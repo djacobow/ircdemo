@@ -1,6 +1,8 @@
-# radmon_d3s
+# ircdemo
 
-Demo for collecting data from Kromek D3s's on remote machines and pushing results to central server for display
+Infrastructure for demonstration of collection of radiation data +
+images from several networked nodes, forwarding data to a single
+server for storage and/or monitoring.
 
 ### Author
 

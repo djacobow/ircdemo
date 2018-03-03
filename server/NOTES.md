@@ -7,6 +7,10 @@ Instead, use NVM to install a recent one. I've tested with 9.7.0
 
 https://github.com/creationix/nvm
 
+## install necessary node modules
+
+`npm install` should be all you need.
+
 ## Missing files.
 
 Several files needed to run this server are not checked into the repo.
@@ -38,9 +42,9 @@ if necessary.
 
 ```json
 [
-  "DJmtFWMWh6VgrLSTO6+dGZZKMJeRW6sBfjtfFXKtlugyyPbDVDrQxZ4BzvcN96ce91HPxFLmbtjsA0WXl6Zff0YS0pf0Dk6HBvv3eZsiFOb2ajUXMyfH6/HhKdBKmkblQh9vIFSxq/7FH7J1vvO7vrVuXSv/ZaIzrpmQx3T3Rdg=",
-  "J2rM13oXCbE5jrk8UcN1bbFKQYRQ75S3X0rEXQcQs9nzVJq/oy3J7eNFiEJtYN1xh58eebkO/vrjd8OgVGBTGwNp69K6IhwBXHmiLC+0L20D+MTyTW6g7Lo+zoB9Offd6SNbFi/9LHHHFoF6uinuwZMEtwrnWVu6mi2kUQls9eY=",
-  "+3hozL4i7TOgA9gINttIaIAkBoZ5wvjFw7Muu4yXnJ2ViIIGTrJoEOnXTUe7AuoTJERtXB5JzrUAK2ABrZZ+wbct2DcDbhLSzg0sj7Kg3ifAeQ+5A9PzfAXhz4lKJxscPb7UXpsirYK+291XxmP38lrnaeObuN6T/RaDOrmGVDI="
+  "lalalalalaleeeleeellee",
+  "fdfdsfdsfdfdfsdfdsfsdf",
+  "2340982423jksndfsdkn2r9"
 ]
 ```
 
