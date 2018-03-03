@@ -55,8 +55,12 @@ This file needs to be present, but it can be empty.
 
 `provisioning_token.json`
 
-```
-"DJmtFWMWh6VgrLSTO6+dGZZKMJeRW6sBfjtfFXKtlugyyPbDVDrQxZ4BzvcN96ce91HPxFLmbtjsA0WXl6Zff0YS0pf0Dk6HBvv3eZsiFOb2ajUXMyfH6/HhKdBKmkblQh9vIFSxq/7FH7J1vvO7vrVuXSv/ZaIzrpmQx3T3Rdg="
+You can get the server to generate candidate provisioning tokens
+by running the server Provisioner.js all by itself. Then copy one
+of the tokens thus created into a single string json file:
+
+```json
+"sdflksdjgldksgjlkdfsdljsdl;gdfgl;jfdl;gfbkjnegergerger"
 ```
 
 Any one of potentially several secret tokens from the server that are used
