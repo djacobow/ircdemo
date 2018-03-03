@@ -96,8 +96,8 @@ configuration is required.
 4. Create the database:
 
    ```mysql
-  create database raddemo;`
-  ```
+   create database raddemo;
+   ```
 
 5. Create a user
 
