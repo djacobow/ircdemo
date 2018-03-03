@@ -129,3 +129,22 @@ configuration is required.
    You'll have to ^C out of that.
 
 
+## Running
+
+You can run the server with 
+
+`/path/to/node index.js`
+
+but a better way to do it is to make it a service run under 
+systemd. A sample ircdemo.service file is provided. On most 
+systems you'll
+
+1. `sudo cp ircdemo.service /etc/systemd/system/`
+2. `sudo systemctl enable ircdemo`
+3. `sudo systemctl start icrdemo`
+
+You can see how things are going like this:
+
+`sudo journalctl -f -u ircdemo`
+
+
