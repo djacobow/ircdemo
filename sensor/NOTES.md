@@ -64,3 +64,21 @@ when the client is provisioning. Once the client has gotten its own
 credentials from the server, this file is no longer needed and can be
 deleted. For best security, it probably should be.
 
+## Running
+
+You can try everything out by running capture.py. Problems 
+will be apparent right away. The first time it runs (successfully)
+it will communicate with the server and provision itself with
+credentials.
+
+You can kill it with ^C.
+
+## Installing as a service
+
+ircdemo.service is provided as an example of how to install
+under systemd.
+
+`sudo cp ircdemo.service /etc/systemd/system`
+`sudo systemctl enable ircdemo`
+`sudo systemctl start ircdemo`
+
