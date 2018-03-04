@@ -6,15 +6,15 @@ var DataDB = function(config) {
     this.config = config;
     mysqlWrap.call(this, config);
 
-    DataDB.prototype.store = function(devname, devdata, cb) {
+    DataDB.prototype.store = function(devname, dtype, devdata, cb) {
         var qs = [
             'INSERT INTO',
             config.name + '.measurements',
-            '(sensor_name,date,data)',
-            'VALUES(?,?,?)',
+            '(sensor_name,date,data_type,data)',
+            'VALUES(?,?,?,?)',
             ';'
         ].join(' ');
-        vals = [ devname, new Date(), JSON.stringify(devdata) ];
+        vals = [ devname, new Date(), dtype, JSON.stringify(devdata) ];
         this.qwrap({sql: qs, timeout: 1000, values: vals},function(sterr,stres) {
             return cb(sterr,stres);
         });
@@ -28,6 +28,7 @@ var DataDB = function(config) {
             'id INT NOT NULL UNIQUE AUTO_INCREMENT,',
             'sensor_name VARCHAR(?) COLLATE latin1_general_cs,',
             'date DATETIME,',
+            'data_type VARCHAR(20),',
             'data JSON,',
             'PRIMARY KEY ( id ),',
             'KEY ( date ),',

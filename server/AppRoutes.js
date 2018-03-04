@@ -27,7 +27,9 @@ AppRoutes.prototype.handleListGet = function(req, res) {
 };
 
 AppRoutes.prototype.dbstore = function(evname, devname, devdata = null) {
-    this.st.store(devname, devdata, function(sterr,stres) {
+    dtype = '_unknown';
+    if (devdata && devdata.data_type) dtype = devdata.data_type;
+    this.st.store(devname, dtype, devdata, function(sterr,stres) {
         if (sterr) console.error(sterr);
     });
 };
