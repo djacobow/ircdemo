@@ -14,13 +14,63 @@ var AppRoutes = function(app_config, dataacceptor) {
 };
 
 AppRoutes.prototype.setupRoutes = function(router) {
-    router.get('/sensornames',   this.handleListGet.bind(this));
+    router.get('/sensornames',   this.handleListDevicesGet.bind(this));
     router.get('/status/:name',  this.handleStatusGet.bind(this));
     router.get('/image/:name',   this.handleImageGet.bind(this));
     router.get('/poll',          this.lp.poll.bind(this.lp));
+    router.get('/history',       this.handleListSamplesGet.bind(this));
+    router.get('/sample/:id',    this.handleSampleGet.bind(this));
 };
 
-AppRoutes.prototype.handleListGet = function(req, res) {
+AppRoutes.prototype.handleSampleGet = function(req, res) {
+    console.log('GET sample');
+    var id= req.params.id;
+    if (!id) {
+        res.status = 400;
+        return res.json({err:'missing_id',messsage:'provide an object id'});
+    }
+    var tthis = this;
+    this.st.getByID(id,function(gerr,gres) {
+        if (gerr) return tthis.noGood(res, gerr);
+        return res.json(gres);
+    });
+};
+
+AppRoutes.prototype.noGood = function(res,err,message = '') {
+   res.status = 400;
+   if (message.length) {
+       return res.json({err:err,message:message});
+   } else {
+       return res.json({err:err});
+   }    
+};
+
+
+AppRoutes.prototype.handleListSamplesGet = function(req, res) {
+    console.log('GET list samples');
+    var fromd = req.query.from;
+    var tod = req.query.to;
+    if (!fromd || !tod) {
+        return this.noGood(res, 'missing_params','missing to and from data params');
+    }
+    try {
+        fromd = new Date(fromd);
+        tod   = new Date(tod);
+    } catch (e) {
+        fromd = null;
+        tod   = null;
+    }     
+    if (!fromd || !tod) {
+        return this.noGood(res, 'params_not_dates','to and from must be valid dates');
+    }
+    var tthis = this;
+    this.st.listByDate(fromd, tod, function(lerr,lres) {
+        if (lerr) return tthis.noGood(res, 'query error',lerr);
+        return res.json(lres);
+    });
+};
+
+AppRoutes.prototype.handleListDevicesGet = function(req, res) {
     console.log('GET list of sensors');
     var devlist = this.da.getdevicelist();
     res.json(devlist);

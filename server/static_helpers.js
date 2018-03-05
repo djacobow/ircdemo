@@ -3,7 +3,13 @@ var simpleSplat = function(res, type, fn) {
     res.sendFile(__dirname + fn);
 };
 
-real_files = { 'async.js':1, 'main.js': 1, 'gobble.wav': 1, 'turkeys.js':1, 'helpers.js':1, 'main.css':1};
+real_files = { 'async.js':1, 
+               'main.js': 1, 
+               'helpers.js':1, 
+               'dateselector.js':1, 
+               'query.js':1, 
+               'query.html':1, 
+               'main.css':1};
 
 var handleStatic = function(req, res) {
    var name = req.params.name.replace('/','');

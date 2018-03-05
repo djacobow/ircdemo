@@ -6,6 +6,55 @@ var DataDB = function(config) {
     this.config = config;
     mysqlWrap.call(this, config);
 
+    DataDB.prototype.getByID = function(id, cb) {
+        var qs = [
+            'select * from',
+            config.name + '.measurements',
+            'where id = ?',
+            ';'
+        ].join(' ');
+        vals = [ id ];
+        this.qwrap({sql: qs, timeout: 1000, values: vals},function(lerr,lres) {
+            if (lerr) console.log(lerr);
+            if (!lres.length) return cb('no_result');
+            var datum = lres[0];
+            try {
+                datum.data = JSON.parse(datum.data);
+            } catch (e) {
+                datum.data = {err:'Problem parsing JSON string.'};
+            }
+            return cb(lerr, datum);
+        });
+    };
+
+    DataDB.prototype.listByDate = function(fromd, tod, cb) {
+        var qs = [
+            'SELECT id, sensor_name, data_type, date FROM',
+            config.name + '.measurements',
+            'WHERE date between ? and ?',
+            ';'
+        ].join(' ');
+        if (typeof fromd.getMonth !== 'function') {
+            try {
+                fromd = new Date(fromd);
+            } catch (e) {
+                fromd = new Date();
+            }
+        }
+        if (typeof tod.getMonth !== 'function') {
+            try {
+                tod = new Date(tod);
+            } catch (e) {
+                tod = new Date();
+            }
+        }
+        vals = [ fromd, tod ];
+        this.qwrap({sql: qs, timeout: 1000, values: vals},function(lerr,lres) {
+            if (lerr) console.log(lerr);
+            return cb(lerr, lres);
+        });
+    };
+
     DataDB.prototype.store = function(devname, dtype, devdata, cb) {
         var qs = [
             'INSERT INTO',

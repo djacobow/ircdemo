@@ -3,32 +3,6 @@ console.log('start');
 var senselems = {};
 var current_results = {};
 
-var makeChartFromArray = function(type, target, data, options = null) {
-    console.log('makeChartFromArry()');
-    var drawChart = function() {
-        console.log('drawChart()');
-        var cdata = google.visualization.arrayToDataTable(data);
-        var chart = null;
-        switch (type) {
-            case 'bar': 
-                chart = new google.visualization.ColumnChart(target); 
-                break;
-            case 'pie': 
-                chart = new google.visualization.PieChart(target); 
-                break;
-            case 'line': 
-                chart = new google.visualization.LineChart(target); 
-                break;
-            default:
-                chart = new google.visualization.ColumnChart(target); 
-        }
-
-        chart.draw(cdata, options);
-    };
-    drawChart();
-};
-
-
 var getDataElementFromDottedName = function(data,name) {
     var d = data;
     var names = name.split(/\./);
