@@ -48,8 +48,36 @@ var getDataElementFromDottedName = function(data,name) {
     return d;
 };
 
+var makeDataTable = function(target, data, names) {
+    removeChildren(target);
+    var tbl = document.createElement('table');
+    tbl.className = 'datatable';
+    tbl.wdith = '100%';
+    target.appendChild(tbl);
+    var pns = Object.keys(names);
+    for (var i=0;i<pns.length;i++) {
+        var friendly_name = pns[i];
+        var data_name = names[friendly_name].n;
+        var unit = names[friendly_name].u;
 
-var makeUL = function(target, data, names) {
+        var dataval = getDataElementFromDottedName(data,data_name);
+
+        try {
+            var tr = document.createElement('tr');
+            var td0 = document.createElement('td');
+            var td1 = document.createElement('td');
+            tr.appendChild(td0);
+            tr.appendChild(td1);
+            td0.innerText = friendly_name;
+            td1.innerText = dataval + ' ' + unit;
+            tbl.appendChild(tr);
+        } catch (e) {
+        }
+    }
+    return tbl;
+};
+
+var makeUL_old = function(target, data, names) {
     removeChildren(target);
     var ul = document.createElement('ul');
     target.appendChild(ul);
@@ -71,9 +99,10 @@ var makeUL = function(target, data, names) {
     return ul;
 };
 
-var makeLeft = function(name, d) {
+var makeChartPanel = function(name, d) {
     // console.log(d.sensor_data.radiation);
     var td0 = senselems[name].td0;    
+    td0.className = 'chartpanel';
     removeChildren(td0);
 
     var title = document.createElement('a');
@@ -121,13 +150,14 @@ var tablenames = {
     },
 };
 
-var makeCenter = function(name, d) {
+var makeKromekPanel = function(name, d) {
     var td2 = senselems[name].td2;    
-    makeUL(td2, d.sensor_data.radiation, tablenames.sensor_fields);
+    td2.className = 'kromekpanel';
+    makeDataTable(td2, d.sensor_data.radiation, tablenames.sensor_fields);
 };
 
 var addLocalIPs = function(d) {
-    var li = document.createElement('li');
+    var tr = document.createElement('tr');
     var ips = {};
     if (d && d.diagnostic && d.diagnostic.host && d.diagnostic.host.ifaces) {
         var ifnames = Object.keys(d.diagnostic.host.ifaces);
@@ -148,14 +178,20 @@ var addLocalIPs = function(d) {
             }
         }
     }
-    li.innerText = 'host.ifaces: ' + JSON.stringify(ips);
-    return li;
+    var td0 = document.createElement('td');
+    var td1 = document.createElement('td');
+    tr.appendChild(td0);
+    tr.appendChild(td1);
+    td0.innerText = 'host.ifaces';
+    td1.innerText = JSON.stringify(ips);
+    return tr;
 };
 
-var makeRight = function(name, d) {
+var makeDiagPanel = function(name, d) {
     var td3 = senselems[name].td3;    
-    var ul = makeUL(td3, d, tablenames.message_fields);
-    ul.appendChild(addLocalIPs(d));
+    td3.className = 'diagpanel';
+    var tbl= makeDataTable(td3, d, tablenames.message_fields);
+    tbl.appendChild(addLocalIPs(d));
     
     var el = document.createElement('p');
     now = new Date();
@@ -243,9 +279,9 @@ var checkData = function(name, cb) {
             } 
 
             if (refresh) {
-                makeLeft(name, new_data);
-                makeCenter(name, new_data);
-                makeRight(name, new_data);
+                makeChartPanel(name, new_data);
+                makeKromekPanel(name, new_data);
+                makeDiagPanel(name, new_data);
             }
 
             current_results[name] = new_data;
@@ -271,10 +307,10 @@ var makeDeviceLayout = function(senslist,cb) {
         td1 = document.createElement('td');
         td2 = document.createElement('td');
         td3 = document.createElement('td');
-        td0.style.width = "25%";
-        td1.style.width = "25%";
-        td2.style.width = "25%";
-        td3.style.width = "25%";
+        td0.style.width = "40%";
+        td1.style.width = "30%";
+        td2.style.width = "15%";
+        td3.style.width = "15%";
         var img1 = document.createElement('img');
         td1.appendChild(img1);
         ntr.appendChild(td0);
