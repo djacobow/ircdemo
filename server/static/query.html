@@ -1,0 +1,42 @@
+<html>
+    <head>
+        <title>IRC Demo Query Data</title>
+    </head>
+    <body>
+        <link rel="stylesheet" type="text/css" href="main.css">
+        <div>
+            <table>
+                <tr>
+                    <td>From</td>
+                    <td></td>
+                    <td>To</td>
+                </tr>
+                <tr>
+                    <td>
+                        <span id="d_start"></span>
+                    </td>
+                    <td>
+                        <input type='button' id='copy_end_to_start' value='<<'><br>
+                        <input type='button' id='copy_start_to_end' value='>>'>
+                    </td>
+                    <td>
+                        <span id="d_end"></span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div>
+            <input id="start_query" type="button" value="Execute">
+        </div>
+        <div id="datalist">
+        </div>
+        <div id="zoomdiv">
+        </div>
+        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+        <script type="text/javascript" src="async.js"></script>
+        <script type="text/javascript" src="helpers.js"></script>
+        <script type="text/javascript" src="dateselector.js"></script>
+        <script type="text/javascript" src="query.js"></script>
+    </body>
+</html>
+
