@@ -38,3 +38,42 @@ table.datatable {
    font-size: 75%;
    word-wrap: break-word;
 }
+
+/* everything here for the query.html page */
+
+img.listthumb {
+    height: auto;
+    width: auto;
+    max-width: 200px;
+    max-height: 200px;
+}
+tr.listheader {
+    font-weight: bold;
+    background-color: #404040;
+    text-align: center;
+}
+tr.list_even {
+    vertical-align: top;
+    background-color: #604040;
+}
+tr.list_odd {
+    vertical-align: top;
+    background-color: #406060;
+}
+div#zoomdiv {
+    display: none;
+    z-index: 10;
+    position: fixed;  
+    left: 5%;
+    top: 5%;
+    right: 0;
+    width: 85%;
+    height: 85%;
+    overflow-y: scroll;
+    overflow-x: scroll;
+    color: black;
+    padding: 10px;
+}
+
+
+
