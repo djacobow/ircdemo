@@ -8,7 +8,7 @@ var AppRoutes = function(app_config, dataacceptor) {
     this.config = app_config;
     this.da = dataacceptor;
     this.lp = new lp();
-    this.st = new storer(dbconfig.db);
+    this.st = new storer(USE_AMAZON ? require('./aws_config.json') : dbconfig.db);
     this.da.setHook('push',this.lp.newChange.bind(this.lp));
     this.da.setHook('push',this.dbstore.bind(this));
     this.da.setHook('ping',this.lp.newChange.bind(this.lp));
