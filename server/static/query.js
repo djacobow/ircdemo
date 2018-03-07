@@ -17,27 +17,32 @@ var endToStart = function() {
     dateHolders.start.setDate(dateHolders.end.getDate());
 };
 
-var fetchItem = function(target, id) {
+var fetchItem = function(target, item) {
+    var id = item.id;
     var url = '/demo1/app/sample/' + id;
+    if (item.data_url) url = item.data_url;
+    var sensor_name = item.sensor_name;
     getJSON(url, function(err,data) {
         if (err) {
             console.err(err);
             return;
         }
         if (data.data_type == 'image') {
-            var cap = cr('div',null,formatDateCompact(data.data.taken));
+            var cap = cr('div',null,formatDateCompact(data.taken));
             var img = cr('img','listthumb');
-            img.src = 'data:image/jpeg;base64,' + data.data.image_jpeg;
+            img.src = 'data:image/jpeg;base64,' + data.image_jpeg;
             target.appendChild(cap);
             target.appendChild(img);
-            img.addEventListener('click',zoomImage);
+            img.addEventListener('click',function(ev) {
+                zoomImage(ev,item);
+            });
         } else if (data.data_type == 'radiation') {
-            var name = data.sensor_name + ' ' + formatDateCompact(data.data.read_time);
+            var name = sensor_name + ' ' + formatDateCompact(data.read_time);
             var carry = [];
             carry.push(['bin','cpm']);
-            var minutes = data.data.time / 60000;
-            for (var j=0;j<data.data.spectrum.length;j++) {
-                carry.push([ j, data.data.spectrum[j]/minutes ]);
+            var minutes = data.time / 60000;
+            for (var j=0;j<data.spectrum.length;j++) {
+                carry.push([ j, data.spectrum[j]/minutes ]);
             }
             makeChartFromArray('line', target, carry, 
                 { title: name,
@@ -46,7 +51,7 @@ var fetchItem = function(target, id) {
                 });
 
             target.addEventListener('click',function(ev) {
-                zoomChart(ev,id);
+                zoomChart(ev,item);
             });
         }
     });
@@ -57,7 +62,7 @@ var unZoom = function() {
     
 };
 
-var zoomImage = function(ev) {
+var zoomImage = function(ev,item) {
     var zd = gebi('zoomdiv');
     removeChildren(zd);
     var img = document.createElement('img');
@@ -67,18 +72,21 @@ var zoomImage = function(ev) {
     zd.style.display = 'block';
 };
 
-var zoomChart = function(ev,id) {
+var zoomChart = function(ev,item) {
+    var id = item.id;
     var zd = gebi('zoomdiv');
-    getJSON('/demo1/app/sample/' + id, function(err,data,url) {
+    var url = '/demo1/app/sample/' + id;
+    if (item.data_url) url = item.data_url;
+    getJSON(url, function(err,data,url) {
         if (!err) {
             removeChildren(zd);
-            var name = data.sensor_name + ' ' + formatDateCompact(data.data.read_time);
+            var name = item.sensor_name + ' ' + formatDateCompact(data.read_time);
             zd.style.display = 'block';
             var carry = [];
             carry.push(['bin','cpm']);
-            var minutes = data.data.time / 60000;
-            for (var j=0;j<data.data.spectrum.length;j++) {
-                carry.push([ j, data.data.spectrum[j]/minutes ]);
+            var minutes = data.time / 60000;
+            for (var j=0;j<data.spectrum.length;j++) {
+                carry.push([ j, data.spectrum[j]/minutes ]);
            }
            makeChartFromArray('line', zd, carry, {
                title: name,
@@ -97,7 +105,7 @@ var showDataList = function(data) {
         if (!sensor_names[sensor_name]) sensor_names[sensor_name] = 1;
         else sensor_names[sensor_name] += 1;
         var data_type = datum.data_type; 
-        var raw_date = new Date(datum.date);
+        var raw_date = new Date(datum.stdate);
         var bin_date = roundDate(raw_date, 30); 
    
         if (!bins[bin_date]) 
@@ -156,11 +164,11 @@ var showDataList = function(data) {
                     if (data_type == 'radiation') {
                         var d = cr('div');
                         tdr.appendChild(d);
-                        fetchItem(d, item.id);
+                        fetchItem(d, item);
                     } else if (data_type == 'image') {
                         var i = cr('div');
                         tdi.appendChild(i);
-                        fetchItem(tdi, item.id);
+                        fetchItem(tdi, item);
                     }
                 });
             });
