@@ -117,7 +117,6 @@ var showDataList = function(data) {
         bins[bin_date][sensor_name][data_type].push(datum);
     });
 
-
     var table = cr('table');
     var dates = Object.keys(bins).sort();
     var snames = Object.keys(sensor_names).sort();
@@ -159,19 +158,26 @@ var showDataList = function(data) {
             var tdi = cr('td');
             tr.appendChild(tdr);
             tr.appendChild(tdi);
-            Object.keys(bins[date][sname]).forEach(function(data_type) {
-                bins[date][sname][data_type].forEach(function(item) {
-                    if (data_type == 'radiation') {
-                        var d = cr('div');
-                        tdr.appendChild(d);
-                        fetchItem(d, item);
-                    } else if (data_type == 'image') {
-                        var i = cr('div');
-                        tdi.appendChild(i);
-                        fetchItem(tdi, item);
-                    }
+            // console.log(date, sname);
+            var datebin = bins[date];
+            if (datebin[sname]) {
+                // console.log('sname:' + sname);
+                Object.keys(datebin[sname]).forEach(function(data_type) {
+                    datebin[sname][data_type].forEach(function(item) {
+                        if (data_type == 'radiation') {
+                            var d = cr('div');
+                            tdr.appendChild(d);
+                            fetchItem(d, item);
+                        } else if (data_type == 'image') {
+                            var i = cr('div');
+                            tdi.appendChild(i);
+                            fetchItem(tdi, item);
+                        }
+                    });
                 });
-            });
+            } else {
+                console.log('datebin has no sname',sname, datebin);
+            }
         });
         rowcount += 1;
     });
