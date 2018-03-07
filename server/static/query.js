@@ -76,7 +76,7 @@ var zoomChart = function(ev,id) {
             zd.style.display = 'block';
             var carry = [];
             carry.push(['bin','cpm']);
-            var minutes = data.data.time;
+            var minutes = data.data.time / 60000;
             for (var j=0;j<data.data.spectrum.length;j++) {
                 carry.push([ j, data.data.spectrum[j]/minutes ]);
            }
