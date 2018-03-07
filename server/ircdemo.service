@@ -1,0 +1,16 @@
+[Unit]
+Description=Institute for Resilient Communities Rad+Image Demo
+
+[Service]
+Type=simple
+Restart=always
+User=dgj
+Group=dgj
+RestartSec=10
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+WorkingDirectory=/home/dgj/ircdemo/server
+ExecStart=/home/dgj/.nvm/versions/node/v9.7.0/bin/node /home/dgj/ircdemo/server/index.js
+
+[Install]
+WantedBy=multi-user.target
+
