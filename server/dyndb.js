@@ -33,25 +33,6 @@ DataDB.prototype.getByID = function(id, cb) {
         }
         return cb(null,d);
     });
-
-    /*
-    var p = {
-        TableName: this.config.table_name,
-        KeyConditionExpression: "id = :id",
-        ExpressionAttributeValues: {
-            ':id': id,
-        },
-    };
-    this.docClient.query(p,function(e,d) {
-        if (e) {
-            console.error(JSON.stringify(e,null,2));
-            return cb(e);
-        }
-        if (!d.Count) return cb('nothing_matched');
-        if (d.Count > 1) return cb('non_unique_key');
-        return cb(null,d.Items[0]);
-    });
-    */
 };
 
 DataDB.prototype.listByDate = function(fromd, tod, cb) {
