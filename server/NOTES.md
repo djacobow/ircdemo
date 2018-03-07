@@ -16,8 +16,9 @@ https://github.com/creationix/nvm
 Several files needed to run this server are not checked into the repo.
 
 `mysql_creds.json`
+`aws_creds.json`
 
-Contains credentials for mysql for storing data. The file should look like this:
+Contains credentials for mysql or AWS for storing data. The `mysql_creds` should look like this:
 
 ```json
 {
@@ -32,6 +33,17 @@ Contains credentials for mysql for storing data. The file should look like this:
     }
 }
 ```
+
+and `aws_creds` would look like this:
+
+```json
+{
+ "secretAccessKey": "sdfldkjfldsfdfds",
+ "accessKeyId": "FFFDDASDASDASA",
+ "region": "us-west-2"
+}
+```
+
 
 `provisioning_tokens.json`
 
@@ -74,7 +86,12 @@ Credentials for provisioned clients are stored in a sqlite
 database. It will be created for you when you run and no 
 configuration is required.
 
-## Mysql Database preparation
+## Database Preparation
+
+You will have to set up one or another database. I've got code
+here for either mysql locally or AWS Dynamo DB + AWS S3
+
+### Mysql Database preparation
 
 1. Install mysql by your package manager.
 
@@ -127,6 +144,18 @@ configuration is required.
    `node storer.js`
 
    You'll have to ^C out of that.
+
+
+### AWS Database prepration
+
+How to do this is a bit beyond the scope of this how to but basically:
+
+1. Create an AWS account
+2. Create credentials that have RW rights for S3 and DynamoDB
+3. Create a DynamoDB table named whatever it says in your `aws_config.json`
+4. Create an S3 bucket named whatever it says in your `aws_config.json`
+5. Set public-read permissions on the S3 bucket. This lets the webbrowser download files direcly, bypassing the app server.
+6. Also, set a CORS header for the S3 bucket that will allow GETs.
 
 
 ## Running
