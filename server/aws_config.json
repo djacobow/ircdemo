@@ -1,0 +1,5 @@
+{
+    "cred_path": "./aws_creds.json",
+    "table_name": "raddemo_measurements",
+    "bucket_name": "irc-raddemo"
+}

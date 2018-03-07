@@ -23,15 +23,15 @@ var DataDB = function(config) {
             } catch (e) {
                 datum.data = {err:'Problem parsing JSON string.'};
             }
-            return cb(lerr, datum);
+            return cb(lerr, datum.data);
         });
     };
 
     DataDB.prototype.listByDate = function(fromd, tod, cb) {
         var qs = [
-            'SELECT id, sensor_name, data_type, date FROM',
+            'SELECT id, sensor_name, data_type, stdate FROM',
             config.name + '.measurements',
-            'WHERE date between ? and ?',
+            'WHERE stdate between ? and ?',
             ';'
         ].join(' ');
         if (typeof fromd.getMonth !== 'function') {
@@ -59,7 +59,7 @@ var DataDB = function(config) {
         var qs = [
             'INSERT INTO',
             config.name + '.measurements',
-            '(sensor_name,date,data_type,data)',
+            '(sensor_name,stdate,data_type,data)',
             'VALUES(?,?,?,?)',
             ';'
         ].join(' ');
@@ -76,11 +76,11 @@ var DataDB = function(config) {
             '(',
             'id INT NOT NULL UNIQUE AUTO_INCREMENT,',
             'sensor_name VARCHAR(?) COLLATE latin1_general_cs,',
-            'date DATETIME,',
+            'stdate DATETIME,',
             'data_type VARCHAR(20),',
             'data JSON,',
             'PRIMARY KEY ( id ),',
-            'KEY ( date ),',
+            'KEY ( stdate ),',
             'KEY ( sensor_name )',
             ')',
             'default charset=latin1',

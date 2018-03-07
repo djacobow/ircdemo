@@ -1,7 +1,8 @@
 /*jshint esversion: 6 */
 var lp = require('./LongPoller.js');
 var dbconfig = require('./mysql_creds.json');
-var storer   = require('./storer.js');
+var USE_AMAZON = true;
+var storer = require(USE_AMAZON ? './dyndb.js' : './mysqldb.js');
 
 var AppRoutes = function(app_config, dataacceptor) {
     this.config = app_config;
