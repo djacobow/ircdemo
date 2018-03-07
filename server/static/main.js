@@ -87,15 +87,19 @@ var makeChartPanel = function(name, d) {
     var cdiv = document.createElement('div');
     td0.appendChild(cdiv);
     var carry = [];
-    carry.push(['bin','count']);
+    var minutes = d.sensor_data.radiation.time / 60000;
+    carry.push(['bin','cpm']);
     for (var j=0;j<d.sensor_data.radiation.spectrum.length;j++) {
-        carry.push([j,d.sensor_data.radiation.spectrum[j]]);
+        carry.push([j , d.sensor_data.radiation.spectrum[j]/minutes ]);
     }
 
     makeChartFromArray('line',
                        cdiv,
                        carry,
-                       {'title':name});
+                       {title:name,
+                           vAxis: { title: 'cpm' },
+                           legend: { position: 'none' },
+                       });
 };
 
 var tablenames = {

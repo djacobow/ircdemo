@@ -34,11 +34,17 @@ var fetchItem = function(target, id) {
         } else if (data.data_type == 'radiation') {
             var name = data.sensor_name + ' ' + formatDateCompact(data.data.read_time);
             var carry = [];
-            carry.push(['bin','count']);
+            carry.push(['bin','cpm']);
+            var minutes = data.data.time / 60000;
             for (var j=0;j<data.data.spectrum.length;j++) {
-                carry.push([j,data.data.spectrum[j]]);
+                carry.push([ j, data.data.spectrum[j]/minutes ]);
             }
-            makeChartFromArray('line', target, carry, {'title':name});
+            makeChartFromArray('line', target, carry, 
+                { title: name,
+                  vAxis: { title: 'cpm', },
+                  legend: { position: 'none', },
+                });
+
             target.addEventListener('click',function(ev) {
                 zoomChart(ev,id);
             });
@@ -69,11 +75,16 @@ var zoomChart = function(ev,id) {
             var name = data.sensor_name + ' ' + formatDateCompact(data.data.read_time);
             zd.style.display = 'block';
             var carry = [];
-            carry.push(['bin','count']);
+            carry.push(['bin','cpm']);
+            var minutes = data.data.time;
             for (var j=0;j<data.data.spectrum.length;j++) {
-                carry.push([j,data.data.spectrum[j]]);
+                carry.push([ j, data.data.spectrum[j]/minutes ]);
            }
-           makeChartFromArray('line', zd, carry, {'title':name});
+           makeChartFromArray('line', zd, carry, {
+               title: name,
+               vAxis: { title: 'cpm', },
+               legend: { position: 'none', },
+           });
         }
     });
 };
