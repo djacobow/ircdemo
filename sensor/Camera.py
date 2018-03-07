@@ -36,6 +36,8 @@ class Camera():
         print('captureToJPEGStr()')
         stream = io.BytesIO()
         camera = self.camera
+        for param in self.config['params']:
+            setattr(camera,param,self.config['params'][param])
         self.last_cap = myhelpers.nowstr()
         camera.capture(stream,'jpeg')
         stream.seek(0)
