@@ -1,14 +1,24 @@
 /*jshint esversion: 6 */
 var lp = require('./LongPoller.js');
-var dbconfig = require('./mysql_creds.json');
-var USE_AMAZON = true;
-var storer = require(USE_AMAZON ? './dyndb.js' : './mysqldb.js');
+
+// A couple choices here...
+var backends = {
+    'local_mysql': './db_mysql.js',
+    's3+dynamo'  : './db_s3_dyn.js',
+    's3+aurora'  : './db_s3_aur.js',
+};
+
+var my_backend = 's3+aurora';
+
+var storer = require(backends[my_backend]);
 
 var AppRoutes = function(app_config, dataacceptor) {
     this.config = app_config;
     this.da = dataacceptor;
     this.lp = new lp();
-    this.st = new storer(USE_AMAZON ? require('./aws_config.json') : dbconfig.db);
+    this.st = new storer(
+        my_backend == 'local_mysql' ? require('./mysql_creds.json').db : require('./aws_config.json')
+    );
     this.da.setHook('push',this.lp.newChange.bind(this.lp));
     this.da.setHook('push',this.dbstore.bind(this));
     this.da.setHook('ping',this.lp.newChange.bind(this.lp));

@@ -1,5 +1,18 @@
 {
-    "cred_path": "./aws_creds.json",
-    "table_name": "raddemo_measurements",
-    "bucket_name": "irc-raddemo"
+    "aws": {
+        "cred_path": "./aws_creds.json",
+        "table_name": "raddemo_measurements",
+        "bucket_name": "irc-raddemo"
+    },
+    "mysql": {
+        "name": "raddemo",
+        "max_name_length" : 20,
+        "conn_params": {
+            "host": "raddemo1.czfjhljcc4ke.us-west-2.rds.amazonaws.com",
+            "ssl": {
+              "ca_file": "rds-combined-ca-bundle.pem"
+            },
+            "pw_path": "./aurora_creds.json"
+        }
+    }
 }
