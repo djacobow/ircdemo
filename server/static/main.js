@@ -47,6 +47,7 @@ var makeDataTable = function(target, data, names) {
             if (link_start) {
                 var a = document.createElement('a');
                 a.href = link_start + dataval;
+                a.target = '_blank';
                 a.innerText = dataval;
                 td1.appendChild(a);
             } else {
