@@ -56,9 +56,15 @@ tr.list_even {
     vertical-align: top;
     background-color: #604040;
 }
+tr.list_even td {
+    white-space: nowrap;
+}
 tr.list_odd {
     vertical-align: top;
     background-color: #406060;
+}
+tr.list_odd td {
+    white-space: nowrap;
 }
 div#zoomdiv {
     display: none;
