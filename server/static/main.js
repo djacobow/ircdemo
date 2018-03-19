@@ -33,6 +33,7 @@ var makeDataTable = function(target, data, names) {
         var friendly_name = pns[i];
         var data_name = names[friendly_name].n;
         var unit = names[friendly_name].u;
+        var link_start = names[friendly_name].l;
 
         var dataval = getDataElementFromDottedName(data,data_name);
 
@@ -43,7 +44,14 @@ var makeDataTable = function(target, data, names) {
             tr.appendChild(td0);
             tr.appendChild(td1);
             td0.innerText = friendly_name;
-            td1.innerText = dataval + ' ' + unit;
+            if (link_start) {
+                var a = document.createElement('a');
+                a.href = link_start + dataval;
+                a.innerText = dataval;
+                td1.appendChild(a);
+            } else {
+                td1.innerText = dataval + ' ' + unit;
+            }
             tbl.appendChild(tr);
         } catch (e) {
         }
@@ -119,8 +127,7 @@ var tablenames = {
     message_fields: {
         'Date': { n: 'date', u: '' },
         'Node Name': { n: 'node_name', u: '' },
-        // 'host.ip': { n: 'diagnostic.host.ip', u: '' },
-        'host.public_ip': { n: 'diagnostic.host.public_ip', u: '' },
+        'host.public_ip': { n: 'diagnostic.host.public_ip', u: '', l:'ssh://pi@', },
         'host.name': { n: 'diagnostic.host.name', u: '' },
         'host.uptime': { n: 'diagnostic.host.uptime', u: '' },
         'service.uptime': { n: 'diagnostic.service.uptime', u: '' },
