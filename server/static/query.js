@@ -31,7 +31,12 @@ var fetchItem = function(target, item) {
             var cap = cr('div',null,formatDateCompact(data.taken));
             var img = cr('img','listthumb');
             img.src = 'data:image/jpeg;base64,' + data.image_jpeg;
+            var lbl = null;
+            if (data.labels) {
+                lbl = cr('div',null,data.labels.map(function(x) { return x.Name + ' (' + Math.floor(x.Confidence+0.5) + ')'; }).join(', '));
+            }
             target.appendChild(cap);
+            if (lbl) target.appendChild(lbl);
             target.appendChild(img);
             img.addEventListener('click',function(ev) {
                 zoomImage(ev,item);

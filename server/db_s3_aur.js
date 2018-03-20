@@ -58,13 +58,13 @@ DataDB.prototype.store = function(devname, dtype, devdata, cb) {
             return cb(ue);
         }
 
-        tthis.indexdb.store(devname, dtype, ud.Location, function(se,sd) {
+        tthis.indexdb.store(devname, dtype, ud.Location, devdata, function(se,sd) {
             if (se) {
                 console.error(
                     'unable to store datum', 
                     JSON.stringify(se,null,2),
                     JSON.stringify(sd,null,2));
-                return sb(se,sd);
+                return cb(se,sd);
             }
             return cb(null,sd);
    

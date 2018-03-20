@@ -1,5 +1,14 @@
 /*jshint esversion: 6 */
-var lp = require('./LongPoller.js');
+var lp      = require('./LongPoller.js');
+var helpers = require('./helpers.js');
+
+var RUN_REKOGNITION = false;
+
+if (RUN_REKOGNITION) {
+    var aws     = require('aws-sdk');
+    aws.config.loadFromPath('./aws_creds.json');
+}
+
 
 // A couple choices here...
 var backends = {
@@ -22,6 +31,11 @@ var AppRoutes = function(app_config, dataacceptor) {
     this.da.setHook('push',this.lp.newChange.bind(this.lp));
     this.da.setHook('push',this.dbstore.bind(this));
     this.da.setHook('ping',this.lp.newChange.bind(this.lp));
+    if (RUN_REKOGNITION) {
+        this.rekognition = new aws.Rekognition();
+    } else {
+        this.rekognition = null;
+    }
 };
 
 AppRoutes.prototype.setupRoutes = function(router) {
@@ -87,12 +101,49 @@ AppRoutes.prototype.handleListDevicesGet = function(req, res) {
     res.json(devlist);
 };
 
+AppRoutes.prototype.rekognize = function(devname, dtype, devdata, finish) {
+    if (this.rekognition) {
+        var parms = {
+            Image: {
+                Bytes: Buffer.from(devdata.image_jpeg,'base64'),
+            },
+            MaxLabels: 20,
+            MinConfidence: 55,
+        };
+        this.rekognition.detectLabels(parms, function(rekerr, rekdata) {
+            if (!rekerr) devdata.labels = rekdata.Labels;
+            return finish(devname,dtype,devdata);
+        });
+    } else {
+        return finish(devname,dtype,devdata);
+    }
+};
+
 AppRoutes.prototype.dbstore = function(evname, devname, devdata = null) {
+    var tthis = this;
     dtype = '_unknown';
     if (devdata && devdata.data_type) dtype = devdata.data_type;
-    this.st.store(devname, dtype, devdata, function(sterr,stres) {
-        if (sterr) console.error(sterr);
-    });
+    
+    var finish = function(devname, dtype, devdata) {
+        tthis.st.store(devname, dtype, devdata, function(sterr,stres) {
+            if (sterr) console.error(sterr);
+        });
+    };
+
+    if (dtype == 'radiation') {
+        // get top bins in and convert to counts per minute
+        if (devdata.spectrum) {
+            var sorted_spectrum = helpers.sortIndices(devdata.spectrum).slice(-10);
+            sorted_spectrum.forEach(function(v) {
+                v.val *= (60000 / devdata.time);
+            });
+            devdata.top_bins = sorted_spectrum;
+        }
+        return finish(devname, dtype, devdata);
+    } else if (dtype == 'image') {
+        this.rekognize(devname,dtype,devdata,finish);
+    }
+
 };
 
 

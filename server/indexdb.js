@@ -57,15 +57,63 @@ var IndexDB = function(config) {
         });
     };
 
-    IndexDB.prototype.store = function(devname, dtype, durl, cb) {
-        var qs = [
-            'INSERT INTO',
-            config.name + '.measurements',
-            '(sensor_name,stdate,data_type,data_url)',
-            'VALUES(?,?,?,?)',
-            ';'
-        ].join(' ');
-        vals = [ devname, new Date(), dtype, durl ];
+    IndexDB.prototype.store = function(devname, dtype, durl, devdata, cb) {
+        var qs, vals;
+        switch (dtype) {
+            case 'radiation':
+                
+                qs = [
+                    'INSERT INTO',
+                    config.name + '.measurements',
+                    '(sensor_name,stdate,data_type,data_url,peak_cpm,peak_bin)',
+                    'VALUES(?,?,?,?,?,?)',
+                    ';'
+                ].join(' ');
+                if (!devdata.top_bins) console.log('devdata no top bins', devdata);
+                var peak = devdata.top_bins.pop();
+                // iv top bin was 4095 that is ... I dunno ... a catchall for
+                // everything above the highest energy level? We probably do 
+                // not want it.
+                if (peak.bin == 4095) peak = devdata.top_bins.pop();
+                vals = [ devname, new Date(), dtype, durl, peak.val, peak.bin ];
+                // console.log(vals);
+                break;
+            case 'image':
+                var lcount = 0;
+                if (devdata.labels) lcount = devdata.labels.length;
+                var l1 = null;
+                var l2 = null;
+                var l1_conf = null;
+                var l2_conf = null;
+                if (lcount >= 1) {
+                    l1 = devdata.labels[0].Name;
+                    l1_conf = devdata.labels[0].Confidence;
+                }
+                if (lcount >= 2) {
+                    l2 = devdata.labels[1].Name;
+                    l2_conf = devdata.labels[1].Confidence;
+                }
+                qs = [
+                    'INSERT INTO',
+                    config.name + '.measurements',
+                    '(sensor_name,stdate,data_type,data_url,object1,object1_conf,object2,object2_conf)',
+                    'VALUES(?,?,?,?,?,?,?,?)',
+                    ';'
+                ].join(' ');
+                vals = [ devname, new Date(), dtype, durl, l1, l1_conf, l2, l2_conf ];
+                break;
+            case 'default':
+                qs = [
+                    'INSERT INTO',
+                    config.name + '.measurements',
+                    '(sensor_name,stdate,data_type,data_url)',
+                    'VALUES(?,?,?,?)',
+                    ';'
+                ].join(' ');
+                vals = [ devname, new Date(), dtype, durl ];
+                break;
+        }
+
         this.qwrap({sql: qs, timeout: 1000, values: vals},function(sterr,stres) {
             return cb(sterr,stres);
         });
@@ -81,6 +129,12 @@ var IndexDB = function(config) {
             'data_url  VARCHAR(256),',
             'sensor_name VARCHAR(80),',
             'stdate DATETIME,',
+            'peak_cpm FLOAT default NULL,',
+            'peak_bin INTEGER default NULL,',
+            'object1 VARCHAR(40) default NULL,',
+            'object1_conf FLOAT default NULL,',
+            'object2 VARCHAR(40) default NULL,',
+            'object2_conf FLOAT default NULL,',
             'PRIMARY KEY ( id ),',
             'KEY ( stdate ),',
             'KEY ( sensor_name )',
