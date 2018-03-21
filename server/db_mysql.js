@@ -1,10 +1,21 @@
 /* jshint esversion:6 */
 var path      = require('path');
 var mysqlWrap = require('./mysql_wrap.js');
+var fs        = require('fs');
 
 var DataDB = function(config) {
     this.config = config;
     mysqlWrap.call(this, config);
+
+    if (this.config.conn_params &&
+        this.config.conn_params.ssl && 
+        this.config.conn_params.ssl.ca_file) {
+        this.config.conn_params.ssl.ca = fs.readFileSync(
+            __dirname + '/' + this.config.conn_params.ssl.ca_file
+        );
+        delete this.config.conn_params.ssl.ca_file;
+    }
+    console.log(this.config);
 
     DataDB.prototype.getByID = function(id, cb) {
         var qs = [
@@ -104,7 +115,7 @@ module.exports =  DataDB;
 
 if (require.main == module) {
 
-    var config = require('./mysql_creds.json');
+    var config = require('./mysql_creds_local.json');
     db = new DataDB(config.db);
     db.create_dtable(function() { });
 }
