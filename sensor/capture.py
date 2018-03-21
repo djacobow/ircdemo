@@ -16,7 +16,7 @@ base_config = {
     'photo_period': 20,
     'config_check_period': 7200,
     'ping_period': 900,
-    'tick_length': 0.25,
+    'tick_length': 1,
     'sensor_params': { },
     'max_consec_net_errs': 10,
     'mail_check_period': 7200,
