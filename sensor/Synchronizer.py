@@ -15,7 +15,8 @@ class Synchronizer():
         self.c = {
             'time_url': 'http://irc-dev.lbl.gov/demo1/device/time',
             'attempts': 20,
-            'min_successes': 5,
+            'min_successes': 10,
+            'min_to_avg': 5,
             'timeout': 5,
         }
 
@@ -72,12 +73,16 @@ class Synchronizer():
             return None
 
 
-        # get the "middle" / "median" delta value. If the list length
-        # is even, get the value adjacent to the median
+        # NEW: average the "middle" / "median" samples
         sorted_attempts = sorted(attempts, key=lambda x: x['local_remote_delta'])
-        middle = sorted_attempts[len(sorted_attempts)//2]
+        first = (len(sorted_attempts) - self.c['min_to_avg']) // 2
+        avg = sum([ x['local_remote_delta'] for x in sorted_attempts[first:first+self.c['min_to_avg']] ])
+        avg /= self.c['min_to_avg']
 
-        self.last_delta = middle['local_remote_delta']
+        # OLD: get the "middle" / "median" delta value. If the list length
+        # is even, get the value adjacent to the median
+        #self.last_delta = middle['local_remote_delta']
+        self.last_delta = avg
         return self.last_delta
         
 
