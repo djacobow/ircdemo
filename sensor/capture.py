@@ -169,10 +169,22 @@ class CapHandlers(object):
 
     def cfgCheck(self, name, now):
         self.cfg['sconn'].getParams(self.cfg)
+        self.resetHandlers()
 
     def syncClock(self, name, now):
         synchronizeSystemClock()
 
+    def resetHandlers(self):
+        te = self.cfg['timer']
+        mh = self.cfg['mailhandler']
+        te.addHandler(self.doPing,       self.cfg['ping_period'],         'h_ping')
+        te.addHandler(self.takeReading,  self.cfg['reading_period'],      'h_read')
+        te.addHandler(self.takePhoto,    self.cfg['photo_period'],        'h_take')
+        te.addHandler(self.checkNetErrs, self.cfg['reading_period'],      'h_chcknet')
+        te.addHandler(mh.checkNew,     self.cfg['mail_check_period'],   'h_chkmail')
+        te.addHandler(mh.checkComplete,self.cfg['bground_check_period'],'h_chkbground')
+        te.addHandler(self.syncClock,    self.cfg['clock_resync_period'], 'h_resync')
+        te.addHandler(self.cfgCheck,     self.cfg['config_check_period'], 'h_chkcfg')
 
 
 class MessageHandler(object):
@@ -201,21 +213,15 @@ class MessageHandler(object):
 
 
 
-
 def mymain(cfg):
 
     ch = CapHandlers(cfg)
     te = TimerLoop.TimerLoop()
     mh = MessageHandler(cfg['sconn'])
+    cfg['timer'] = te
+    cfg['mailhandler'] = mh
 
-    te.addHandler(ch.doPing,       cfg['ping_period'])
-    te.addHandler(ch.takeReading,  cfg['reading_period'])
-    te.addHandler(ch.takePhoto,    cfg['photo_period'])
-    te.addHandler(ch.checkNetErrs, cfg['reading_period'])
-    te.addHandler(ch.cfgCheck,     cfg['config_check_period'])
-    te.addHandler(mh.checkNew,     cfg['mail_check_period'])
-    te.addHandler(mh.checkComplete,cfg['bground_check_period'])
-    te.addHandler(ch.syncClock,    cfg['clock_resync_period'])
+    ch.resetHandlers()
 
     te.run(cfg['tick_length'])
 
