@@ -58,6 +58,8 @@ class ServerConnection(object):
         self.non_override_keys = {
             'sconn': 1,
             'kconn': 1,
+            'timer': 1,
+            'mailhandler': 1,
         }
         # return local IP. We'll get the public IP from the http request,
         # and there's no good reason to trust the device for that
