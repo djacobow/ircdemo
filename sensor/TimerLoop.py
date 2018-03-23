@@ -1,5 +1,6 @@
 import datetime
 import time
+import math
 
 # A Very Simple even loop where the only events are timeouts.
 
@@ -67,11 +68,21 @@ class TimerLoop(object):
         return request_stop
 
 
-    def run(self, tick_len = 0.5):
+    def waitForRounded(self, roundsecs = None):
+        if roundsecs is not None:
+            delay = roundsecs - math.fmod(datetime.datetime.now().timestamp(), roundsecs)
+            if delay > 0:
+                time.sleep(delay)
+
+
+    def run(self, tick_len = 0.5, roundstart = 30):
+
+        self.waitForRounded(roundstart)
+
         running = True
         while running:
             stop = self.tick()
             if stop:
                 running = False
-            time.sleep(tick_len)
+            self.waitForRounded(tick_len)
 
