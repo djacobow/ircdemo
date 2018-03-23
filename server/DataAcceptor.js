@@ -146,11 +146,17 @@ DataAcceptor.prototype.handleParamsGet = function(req, res) {
     this.pv.tokValid(b,function(v) {
         if (v) {
             res.status(200);
-            if (tthis.cparams.hasOwnProperty(b.identification.node_name)) {
-                res.json(this.cparams[b.identification.node_name]);
-            } else {
-                res.json({});
+            var rv = {};
+            if (tthis.cparams.__ALL_DEVICES__) {
+                // deep clone
+                rv = JSON.parse(JSON.stringify(tthis.cparams.__ALL_DEVICES__));
             }
+            if (tthis.cparams.hasOwnProperty(b.identification.node_name)) {
+                Object.keys(this.cparams[b.identification.node_name]).forEach(function(kn) {
+                    rv[kn] = tthis.cparams[b.identification.node_name][kn];
+                });
+            }
+            res.json(rv);
             tthis.fireHook('getparams',b.identification.node_name);
             return;
         }
