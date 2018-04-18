@@ -5,7 +5,7 @@ from os import system
 import time
 import kromek
 import ServerConnection
-import TimerLoop
+import TimerWorkerLoop
 import Backgrounder
 import Camera
 import json
@@ -16,11 +16,11 @@ base_config = {
     'photo_period': 20,
     'config_check_period': 7200,
     'ping_period': 900,
-    'tick_length': 1,
+    'tick_length': 0.2,
     'sensor_params': { },
     'max_consec_net_errs': 10,
     'mail_check_period': 7200,
-    'bground_check_period': 5,
+    'bground_check_period': 600,
     'clock_resync_period': 7200,
     'camera': {
         'skip_comparison': True,
@@ -142,8 +142,10 @@ class CapHandlers(object):
         self.cfg = cfg
 
     def takeReading(self, name, now):
-        sdata = readSensor(self.cfg)
-        res = self.cfg['sconn'].push(sdata,'radiation')
+        return readSensor(self.cfg)
+
+    def postReading(self, item, now):
+        res = self.cfg['sconn'].push(item,'radiation')
         print(res)
         return False
 
@@ -153,38 +155,44 @@ class CapHandlers(object):
             phdata = cfg['cconn'].captureToJPEGStr()
         else:
             phdata = cfg['cconn'].takeAndComparePhoto()
-        if phdata:
-            res = cfg['sconn'].push(phdata,'image')
-            print(res)
-        else:
+
+        if phdata is None:
             print('No image to upload.')
+        return phdata
+
+    def postPhoto(self, item, now):
+        res = cfg['sconn'].push(item,'image')
+        print(res)
+
 
     def checkNetErrs(self, name, now):
         if self.cfg['sconn'].getStats()['consec_net_errs'] > self.cfg['max_consec_net_errs']:
             print('Network not working. I\'m going to kill myself and presumably systemd will restart me.')
             exit(-10)
 
-    def doPing(self, name, now):
+    def doPing(self, item, now):
         res = self.cfg['sconn'].ping()
 
-    def cfgCheck(self, name, now):
+    def doCfgCheck(self, name, now):
         self.cfg['sconn'].getParams(self.cfg)
         self.resetHandlers()
 
-    def syncClock(self, name, now):
+    def doSyncClock(self, item, now):
         synchronizeSystemClock()
 
     def resetHandlers(self):
         te = self.cfg['timer']
         mh = self.cfg['mailhandler']
-        te.addHandler(self.doPing,       self.cfg['ping_period'],         'h_ping')
-        te.addHandler(self.takeReading,  self.cfg['reading_period'],      'h_read')
-        te.addHandler(self.takePhoto,    self.cfg['photo_period'],        'h_take')
-        te.addHandler(self.checkNetErrs, self.cfg['reading_period'],      'h_chcknet')
-        te.addHandler(mh.checkNew,     self.cfg['mail_check_period'],   'h_chkmail')
-        te.addHandler(mh.checkComplete,self.cfg['bground_check_period'],'h_chkbground')
-        te.addHandler(self.syncClock,    self.cfg['clock_resync_period'], 'h_resync')
-        te.addHandler(self.cfgCheck,     self.cfg['config_check_period'], 'h_chkcfg')
+
+        te.addSplitAction('reading', self.takeReading, self.postReading, self.cfg['reading_period'])
+        te.addSplitAction('photo',   self.takePhoto,   self.postPhoto,   self.cfg['photo_period'])
+        te.addSplitAction('mail-out',mh.reqCheckOutMessages,mh.postOutMessages, self.cfg['bground_check_period'])
+        te.addTimedAction('checkmail', mh.doCheckNew,     self.cfg['mail_check_period'])
+        te.addTimedAction('check_net', self.checkNetErrs, self.cfg['reading_period'])
+        te.addTimedAction('ping',      self.doPing,       self.cfg['ping_period'])
+        te.addTimedAction('resync',    self.doSyncClock,  self.cfg['clock_resync_period'])
+        te.addTimedAction('cfgcheck',  self.doCfgCheck,   self.cfg['config_check_period'])
+
 
 
 class MessageHandler(object):
@@ -196,18 +204,22 @@ class MessageHandler(object):
         if mt:
             return mt == t
         return false
-    def checkNew(self, name, now):
+    def doCheckNew(self, name, now):
         messages = self.sconn.getMail()
         for message in messages:
             if self.messageType(message,'shell_script'):
                 self.backgrounder.startNew(message)
             elif self.messageType(message,'restart'):
                 sys.exit(0)
-    def checkComplete(self, name, now):
+
+    def reqCheckOutMessages(self, name, now):
         count, reses = self.backgrounder.checkResults()
-        if count:
-            for msgid in reses:
-                self.sconn.respondMail(msgid,reses[msgid])
+        return {'count':count,'reses':reses}
+    def postOutMessages(self, item, now):
+        if item is not None:
+            if item['count']:
+                for msgid in item['reses']:
+                    self.sconn.respondMail(msgid,item['reses'][msgid])
 
 
 
@@ -216,14 +228,15 @@ class MessageHandler(object):
 def mymain(cfg):
 
     ch = CapHandlers(cfg)
-    te = TimerLoop.TimerLoop()
+    te = TimerWorkerLoop.TimerWorkerLoop()
     mh = MessageHandler(cfg['sconn'])
     cfg['timer'] = te
     cfg['mailhandler'] = mh
 
     ch.resetHandlers()
 
-    te.run(cfg['tick_length'])
+    te.startWorker()
+    te.startTimers(False, cfg['tick_length'])
 
 if __name__ == '__main__':
     try:
