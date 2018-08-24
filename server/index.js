@@ -29,11 +29,14 @@ var setup_debug_hooks = function(da) {
 if (require.main === module) {
 
     var dev_config = {
-        'provisioned_clients_path': './provisioned.sqlite',
-        'provisioning_tokens_path': './provisioning_tokens.json',
-        'device_params_path': './sensor_params.json',
-        'mailbox': {
-            'max_per_get': 5,
+        provisioned_clients_path: './provisioned.sqlite',
+        provisioning_tokens_path: './provisioning_tokens.json',
+        device_params: {
+            path: './sensor_params.json',
+            reload_period: 900 * 1000, // 15 minutes
+        },
+        mailbox: {
+            max_per_get: 5,
         },
     };
     var app_config = {

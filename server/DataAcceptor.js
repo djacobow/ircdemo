@@ -22,10 +22,19 @@ var DataAcceptor = function(dev_config) {
     this.pv.load();
     this.mb = new Mailbox(dev_config.mailbox, this.pv, this.fireHook.bind(this));
     this.setupDefaults(); // FIXME: use the callback
-    this.loadSensorParams();
+
+    this.paramReloaderTask();
     this.hooks = {};
 
 };
+
+DataAcceptor.prototype.paramReloaderTask = function() {
+    console.log('paramReloaderTask()');
+    this.loadSensorParams();
+    setTimeout(this.paramReloaderTask.bind(this),
+               this.config.device_params.reload_period);
+};
+
 
 DataAcceptor.prototype.setupRoutes = function(router) {
     router.post('/push',          this.handleDataPost.bind(this));
@@ -93,7 +102,7 @@ DataAcceptor.prototype.handleProvision = function(req, res) {
 
 
 DataAcceptor.prototype.loadSensorParams = function() {
-    this.cparams = JSON.parse(fs.readFileSync(this.config.device_params_path, 'utf8'));
+    this.cparams = JSON.parse(fs.readFileSync(this.config.device_params.path, 'utf8'));
 };
 
 
