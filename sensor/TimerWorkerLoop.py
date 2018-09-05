@@ -15,10 +15,13 @@ import queue
 class TimerWorkerLoop(object):
     def __init__(self):
         self.beginning_of_time = datetime.datetime.fromtimestamp(0)
+        self.max_consec_exceptions = 5
+        self.stop_worker = False
+
         now = datetime.datetime.now()
 
         self.q = queue.Queue()
-
+        
         self.worker = {
             'handlers': {},
             'last_run': self.beginning_of_time,
@@ -77,6 +80,7 @@ class TimerWorkerLoop(object):
 
         handler['name'] = name
         handler['func'] = func
+        handler['consec_exceptions'] = 0
 
         if period is not None:
             handler['period'] = datetime.timedelta(seconds=period)
@@ -103,6 +107,7 @@ class TimerWorkerLoop(object):
 
 
     def __timerTick(self):
+        stop = False
         for name in self.timer['handlers']:
             now = datetime.datetime.now()
             handler = self.timer['handlers'][name]
@@ -115,17 +120,22 @@ class TimerWorkerLoop(object):
                     if data is not None:
                         self.submit(name,data)
                         handler['last_success'] = now
+                        handler['consec_exceptions'] = 0
                 except Exception as e:
+                    handler['consec_exceptions'] += 1
                     print(func)
                     print('Exception calling callback for ' + name)
                     print(e)
+                    if handler['consec_exceptions'] > self.max_consec_exceptions:
+                        print('Maximum handler exceptions exceeded. Stopping.')
+                        stop = True
 
         self.timer['loop_count'] += 1
+        return stop
 
 
     def __workerLoopWrap(self):
-        run = True
-        while run:
+        while not self.stop_worker:
             workitem = None
             try:
                 workitem = self.q.get(block=True, timeout=10)
@@ -134,6 +144,8 @@ class TimerWorkerLoop(object):
 
             if workitem is not None:
                 self.__dispatch(workitem)
+        print('Worker stopped')
+
 
     def startWorker(self):
         t = threading.Thread(target=self.__workerLoopWrap)
@@ -148,8 +160,10 @@ class TimerWorkerLoop(object):
             stop = self.__timerTick()
             if stop is not None and stop is True:
                 running = False
+                self.stop_worker = True
             else:
                 time.sleep(self.timer['tick_len'])
+        print('TimerLoop stopped')
 
 
     def startTimers(self, createThread = False, tick_len = None):
