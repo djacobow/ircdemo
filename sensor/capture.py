@@ -150,6 +150,7 @@ class CapHandlers(object):
         return False
 
     def takePhoto(self, name, now):
+        cfg['cconn'].setParams(cfg['camera'])
         phdata = None
         if cfg['camera']['skip_comparison']:
             phdata = cfg['cconn'].captureToJPEGStr()
