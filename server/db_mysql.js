@@ -25,7 +25,7 @@ var DataDB = function(config) {
             ';'
         ].join(' ');
         vals = [ id ];
-        this.qwrap({sql: qs, timeout: 1000, values: vals},function(lerr,lres) {
+        this.qwrap({sql: qs, timeout: 4000, values: vals},function(lerr,lres) {
             if (lerr) console.log(lerr);
             if (!lres.length) return cb('no_result');
             var datum = lres[0];
@@ -60,7 +60,7 @@ var DataDB = function(config) {
             }
         }
         vals = [ fromd, tod ];
-        this.qwrap({sql: qs, timeout: 1000, values: vals},function(lerr,lres) {
+        this.qwrap({sql: qs, timeout: 4000, values: vals},function(lerr,lres) {
             if (lerr) console.log(lerr);
             return cb(lerr, lres);
         });
@@ -75,7 +75,7 @@ var DataDB = function(config) {
             ';'
         ].join(' ');
         vals = [ devname, new Date(), dtype, JSON.stringify(devdata) ];
-        this.qwrap({sql: qs, timeout: 1000, values: vals},function(sterr,stres) {
+        this.qwrap({sql: qs, timeout: 4000, values: vals},function(sterr,stres) {
             return cb(sterr,stres);
         });
     };

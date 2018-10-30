@@ -50,7 +50,7 @@ var IndexDB = function(config) {
         }
         vals = [ fromd, tod ];
         // console.log(vals);
-        this.qwrap({sql: qs, timeout: 1000, values: vals},function(lerr,lres) {
+        this.qwrap({sql: qs, timeout: 4000, values: vals},function(lerr,lres) {
             if (lerr) console.log(lerr);
             // console.log(JSON.stringify(lres,null,2));
             return cb(lerr, lres);
@@ -114,7 +114,7 @@ var IndexDB = function(config) {
                 break;
         }
 
-        this.qwrap({sql: qs, timeout: 1000, values: vals},function(sterr,stres) {
+        this.qwrap({sql: qs, timeout: 4000, values: vals},function(sterr,stres) {
             return cb(sterr,stres);
         });
     };
