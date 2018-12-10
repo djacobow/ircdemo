@@ -49,10 +49,8 @@ var IndexDB = function(config) {
             }
         }
         vals = [ fromd, tod ];
-        // console.log(vals);
         this.qwrap({sql: qs, timeout: 4000, values: vals},function(lerr,lres) {
-            if (lerr) console.log(lerr);
-            // console.log(JSON.stringify(lres,null,2));
+            if (lerr) console.error(lerr);
             return cb(lerr, lres);
         });
     };
@@ -69,14 +67,13 @@ var IndexDB = function(config) {
                     'VALUES(?,?,?,?,?,?)',
                     ';'
                 ].join(' ');
-                if (!devdata.top_bins) console.log('devdata no top bins', devdata);
+                if (!devdata.top_bins) console.debug('devdata no top bins', devdata);
                 var peak = devdata.top_bins.pop();
                 // iv top bin was 4095 that is ... I dunno ... a catchall for
                 // everything above the highest energy level? We probably do 
                 // not want it.
                 if (peak.bin == 4095) peak = devdata.top_bins.pop();
                 vals = [ devname, new Date(), dtype, durl, peak.val, peak.bin ];
-                // console.log(vals);
                 break;
             case 'image':
                 var lcount = 0;
@@ -145,10 +142,10 @@ var IndexDB = function(config) {
         vals = [ config.max_name_length ];
         this.qwrap({sql: qs, values: vals},function(err, rows) {
             if (err) {
-                console.log(err);
+                console.error(err);
                 return cb(err,null);
             }
-            console.log(rows);
+            console.debug(rows);
             return cb(err, rows);
         });
     };

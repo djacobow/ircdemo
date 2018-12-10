@@ -48,7 +48,7 @@ AppRoutes.prototype.setupRoutes = function(router) {
 };
 
 AppRoutes.prototype.handleSampleGet = function(req, res) {
-    console.log('GET sample');
+    console.debug('GET sample');
     var id= req.params.id;
     if (!id) {
         res.status = 400;
@@ -72,7 +72,7 @@ AppRoutes.prototype.noGood = function(res,err,message = '') {
 
 
 AppRoutes.prototype.handleListSamplesGet = function(req, res) {
-    console.log('GET list samples');
+    console.debug('GET list samples');
     var fromd = req.query.from;
     var tod = req.query.to;
     if (!fromd || !tod) {

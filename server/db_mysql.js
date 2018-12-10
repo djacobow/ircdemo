@@ -15,7 +15,7 @@ var DataDB = function(config) {
         );
         delete this.config.conn_params.ssl.ca_file;
     }
-    console.log(this.config);
+    console.debug(this.config);
 
     DataDB.prototype.getByID = function(id, cb) {
         var qs = [
@@ -26,7 +26,7 @@ var DataDB = function(config) {
         ].join(' ');
         vals = [ id ];
         this.qwrap({sql: qs, timeout: 4000, values: vals},function(lerr,lres) {
-            if (lerr) console.log(lerr);
+            if (lerr) console.error(lerr);
             if (!lres.length) return cb('no_result');
             var datum = lres[0];
             try {
@@ -61,7 +61,7 @@ var DataDB = function(config) {
         }
         vals = [ fromd, tod ];
         this.qwrap({sql: qs, timeout: 4000, values: vals},function(lerr,lres) {
-            if (lerr) console.log(lerr);
+            if (lerr) console.error(lerr);
             return cb(lerr, lres);
         });
     };
@@ -100,10 +100,10 @@ var DataDB = function(config) {
         vals = [ config.max_name_length ];
         this.qwrap({sql: qs, values: vals},function(err, rows) {
             if (err) {
-                console.log(err);
+                console.error(err);
                 return cb(err,null);
             }
-            console.log(rows);
+            console.debug(rows);
             return cb(err, rows);
         });
     };

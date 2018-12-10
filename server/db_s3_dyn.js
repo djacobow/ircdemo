@@ -3,7 +3,7 @@ var aws  = require('aws-sdk');
 
 var DataDB = function(config) {
     this.config = config;
-    console.log(config.cred_path);
+    console.debug(config.cred_path);
     aws.config.loadFromPath(config.cred_path);
     this.docClient = new aws.DynamoDB.DocumentClient();
     this.s3 = new aws.S3({

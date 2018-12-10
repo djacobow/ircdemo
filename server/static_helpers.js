@@ -30,7 +30,7 @@ var handleStatic = function(req, res) {
 };
 
 var handleRootGet = function(req, res) {
-    console.log('GET /');
+    console.debug('GET /');
     simpleSplat(res,'text/html', '/static/index.html');
 };
 
