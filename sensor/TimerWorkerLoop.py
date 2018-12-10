@@ -113,7 +113,6 @@ class TimerWorkerLoop(object):
 
 
     def __timerTick(self):
-        print('tick')
         stop = False
         for name in self.timer['handlers']:
             now = datetime.datetime.now()
