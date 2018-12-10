@@ -62,7 +62,13 @@ class TimerWorkerLoop(object):
         try:
             self.q.put(workitem, block=False)
         except queue.Full:
+            print("work queue full")
             success = False
+        except Exception as e:
+            print("other queue put exception")
+            print(e)
+            success = False
+
         return success
 
        
@@ -107,28 +113,33 @@ class TimerWorkerLoop(object):
 
 
     def __timerTick(self):
+        print('tick')
         stop = False
         for name in self.timer['handlers']:
             now = datetime.datetime.now()
-            handler = self.timer['handlers'][name]
-            if (now - handler['last_run']) > handler['period']:
-                func = handler['func']
-
-                try:
-                    handler['last_run'] = now
-                    data = func(name, now)
-                    if data is not None:
-                        self.submit(name,data)
-                        handler['last_success'] = now
-                        handler['consec_exceptions'] = 0
-                except Exception as e:
-                    handler['consec_exceptions'] += 1
-                    print(func)
-                    print('Exception calling callback for ' + name)
-                    print(e)
-                    if handler['consec_exceptions'] > self.max_consec_exceptions:
-                        print('Maximum handler exceptions exceeded. Stopping.')
-                        stop = True
+            handler = self.timer['handlers'].get(name,None)
+            if handler is None:
+                print("Missing handler for " + name)
+            elif (now - handler['last_run']) > handler['period']:
+                func = handler.get('func',None)
+                if not func:
+                    print("missing handler function for " + name)
+                else:
+                    try:
+                        handler['last_run'] = now
+                        data = func(name, now)
+                        if data is not None:
+                            self.submit(name,data)
+                            handler['last_success'] = now
+                            handler['consec_exceptions'] = 0
+                    except Exception as e:
+                        handler['consec_exceptions'] += 1
+                        print(func)
+                        print('Exception calling callback for ' + name)
+                        print(e)
+                        if handler['consec_exceptions'] > self.max_consec_exceptions:
+                            print('Maximum handler exceptions exceeded. Stopping.')
+                            stop = True
 
         self.timer['loop_count'] += 1
         return stop
@@ -138,12 +149,18 @@ class TimerWorkerLoop(object):
         while not self.stop_worker:
             workitem = None
             try:
-                workitem = self.q.get(block=True, timeout=10)
+                workitem = self.q.get(block=False)
             except queue.Empty:
                 pass
+            except Exception as e:
+                print("other workerloop queue exception:")
+                print(e)
 
             if workitem is not None:
                 self.__dispatch(workitem)
+            else:
+                time.sleep(self.timer['tick_len'])
+
         print('Worker stopped')
 
 
