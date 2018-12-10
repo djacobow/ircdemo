@@ -140,4 +140,12 @@ class Camera():
         }
         return rv
 
+if __name__ == '__main__':
+    print('before init')
+    c = Camera()
+    c.setParams({'params':{}})
+    print('after init')
+    for i in range(4):
+        c.captureToJPEGStr()
+        print('after capture')
 
