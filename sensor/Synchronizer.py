@@ -29,26 +29,27 @@ class Synchronizer():
     def _getOneDelta(self):
         try:
             start = time.time()
-            res = requests.head(self.c['time_url'], timeout= self.c['timeout'])
-            stop = time.time()
-            if res.status_code == 200:
-                remote_ts = float(res.headers['server_time_epoch_ms']) / 1000
-                rtt = stop - start
-                local_remote_delta = remote_ts + (rtt / 2) - stop
-                return {
-                    'result': 'success',
-                    'local': {
-                        'start': start,
-                        'stop': stop,
-                        'rtt': rtt,
-                    },
-                    'remote': {
-                        'ts': remote_ts,
-                    },
-                    'local_remote_delta': local_remote_delta
-                }
-            else:
-                return { 'result': 'badstatus_' + res.status_code}
+            with requests.Session() as s:
+                res = s.head(self.c['time_url'], timeout= self.c['timeout'])
+                stop = time.time()
+                if res.status_code == 200:
+                    remote_ts = float(res.headers['server_time_epoch_ms']) / 1000
+                    rtt = stop - start
+                    local_remote_delta = remote_ts + (rtt / 2) - stop
+                    return {
+                        'result': 'success',
+                        'local': {
+                            'start': start,
+                            'stop': stop,
+                            'rtt': rtt,
+                        },
+                        'remote': {
+                            'ts': remote_ts,
+                        },
+                        'local_remote_delta': local_remote_delta
+                    }
+                else:
+                    return { 'result': 'badstatus_' + res.status_code}
 
 
         except requests.exceptions.Timeout:
