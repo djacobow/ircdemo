@@ -20,6 +20,7 @@ except:
     no_secrets = True
 
 DEBUG_AUTH = False
+NET_TIMEOUT = 45
 
 def dB(n,b):
     if DEBUG_AUTH:
@@ -87,8 +88,9 @@ class ServerConnection(object):
             }
             self._addLoginTok(d)
             url = self.config['mail_post_url']
-            res = requests.post(url, json = d, timeout=20)
-            return res
+            with requests.Session() as s:
+                res = s.post(url, json = d, timeout=NET_TIMEOUT)
+                return res
         except Exception as e:
             print('problem_posting_mail_response',e)
             return None
@@ -101,8 +103,9 @@ class ServerConnection(object):
             d = {}
             self._addLoginTok(d)
             url = self.config['mail_fetch_url'] + '?qstr=' + quote_plus(json.dumps(d))
-            res = requests.get(url, timeout = 20)
-            return res.json()
+            with requests.Session() as s:
+                res = s.get(url, timeout = NET_TIMEOUT)
+                return res.json()
         except Exception as e:
             print('mail_fetch_exception',e)
             return [] 
@@ -119,16 +122,22 @@ class ServerConnection(object):
             self._addLoginTok(data)
             self._addDiagInfo(data)
 
-            res = requests.post(self.config['ping_url'], json = data, timeout=20)
-            self.stats['ping_attempts'] += 1
-            if self.help.httpOK(res.status_code):
-                self.stats['consec_net_errs'] = 0
-            else:
-                self.stats['consec_net_errs'] += 1
-                self.stats['ping_failures'] += 1
-            return res
+            with requests.Session() as s:
+                res = s.post(self.config['ping_url'], json = data, timeout=NET_TIMEOUT)
+                self.stats['ping_attempts'] += 1
+                if self.help.httpOK(res.status_code):
+                    self.stats['consec_net_errs'] = 0
+                else:
+                    self.stats['consec_net_errs'] += 1
+                    self.stats['ping_failures'] += 1
+                return res
+        except requests.exceptions.Timeout:
+            print("timeout occurred while attempting ping")
+            print(self.stats)
+            return None
         except Exception as e:
             print(e)
+            print(self.stats)
             return None
 
 
@@ -178,17 +187,25 @@ class ServerConnection(object):
         self._addDiagInfo(data)
 
         try:
-            res = requests.post(self.config['post_url'], json = data, timeout=60)
-            self.stats['push_attempts'] += 1
-            if self.help.httpOK(res.status_code):
-                self.stats['consec_net_errs'] = 0
-            else:
-                self.stats['consec_net_errs'] += 1
-                self.stats['push_failures'] += 1
-            return res
+            with requests.Session() as s:
+                res = s.post(self.config['post_url'], json = data, timeout=NET_TIMEOUT)
+                self.stats['push_attempts'] += 1
+                if self.help.httpOK(res.status_code):
+                    self.stats['consec_net_errs'] = 0
+                else:
+                    self.stats['consec_net_errs'] += 1
+                    self.stats['push_failures'] += 1
+                return res
+        except requests.exceptions.Timeout:
+            self.stats['consec_net_errs'] += 1
+            self.stats['push_failures'] += 1
+            print("timeout occurred while attempting push.")
+            print(self.stats)
+            return None
         except Exception as e:
             self.stats['consec_net_errs'] += 1
             self.stats['push_failures'] += 1
+            print(self.stats)
             return None
 
 
@@ -231,12 +248,13 @@ class ServerConnection(object):
             d = {}
             self._addLoginTok(d)
             url = self.config['params_url'] + '?qstr=' + quote_plus(json.dumps(d))
-            res = requests.get(url, timeout=30)
-            if res.status_code == 200:
-                data = res.json()
-                self._replkeys(params, data, 'remote')
-            else:
-                print('Got error code fetching params from server.')
+            with requests.Session() as s:
+                res = s.get(url, timeout=30)
+                if res.status_code == 200:
+                    data = res.json()
+                    self._replkeys(params, data, 'remote')
+                else:
+                    print('Got error code fetching params from server.')
         except Exception as e:
             print('Got exception fetching params.')
             print(e)
@@ -258,11 +276,12 @@ class ServerConnection(object):
             'provtok': provtok,
             'name': name,
         }
-        res = requests.post(self.config['url_base'] + '/device/setup/' + name, reqdata)
-        print(res)
-        if res.status_code == 200:
-            resdata = res.json()
-            return resdata
+        with requests.Session() as s:
+            res = s.post(self.config['url_base'] + '/device/setup/' + name, reqdata)
+            print(res)
+            if res.status_code == 200:
+                resdata = res.json()
+                return resdata
         return None
 
 
@@ -311,7 +330,8 @@ class _Helpers():
 
     def myPublicIP(self):
         try:
-            return requests.get('https://ipinfo.io').json()['ip']
+            with requests.Session() as s:
+                return s.get('https://ipinfo.io').json()['ip']
         except:
             return 'dunno'
     def myInterfaces(self):
