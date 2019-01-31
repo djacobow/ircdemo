@@ -12,6 +12,8 @@ import queue
 # called there return quickly, and the worker loop pops work off a queue
 # left by the timer functions and then handles it at its own rate
 
+MAX_Q_LEN = 5
+
 class TimerWorkerLoop(object):
     def __init__(self):
         self.beginning_of_time = datetime.datetime.fromtimestamp(0)
@@ -147,6 +149,12 @@ class TimerWorkerLoop(object):
     def __workerLoopWrap(self):
         while not self.stop_worker:
             workitem = None
+
+            qlen = self.q.qsize()
+            if qlen > MAX_Q_LEN:
+                print("Why is this queue getting so long? Emptying")
+                for i in range(qlen):
+                    self.q.get(block=False)
             try:
                 workitem = self.q.get(block=False)
             except queue.Empty:
